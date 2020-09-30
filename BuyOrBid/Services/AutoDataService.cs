@@ -58,7 +58,7 @@ namespace BuyOrBid.Services
         public async Task<IEnumerable<Make>> GetMakes()
         {
             HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync("https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json");
-            var makeResult = await httpResponseMessage.ConvertResponseToObject<VehicleApiResponse<MakeResult>>();
+            VehicleApiResponse<MakeResult>? makeResult = await httpResponseMessage.ConvertResponseToObject<VehicleApiResponse<MakeResult>>();
             return makeResult?.Results.Select(x => new Make
             {
                 VpicId = x.MakeId,
@@ -69,7 +69,7 @@ namespace BuyOrBid.Services
         public async Task<IEnumerable<Model>> GetModels(Make make)
         {
             HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync($"https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeId/{make.VpicId}?format=json");
-            var modelResult = await httpResponseMessage.ConvertResponseToObject<VehicleApiResponse<ModelResult>>();
+            VehicleApiResponse<ModelResult>? modelResult = await httpResponseMessage.ConvertResponseToObject<VehicleApiResponse<ModelResult>>();
             return modelResult?.Results.Select(x => new Model
             {
                 Make = make,

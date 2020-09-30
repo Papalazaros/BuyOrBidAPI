@@ -13,8 +13,7 @@ namespace BuyOrBid.Services
     public interface IPostService
     {
         Task<T> Get<T>(int postId) where T : Post;
-        Task<IEnumerable<T>> GetAll<T>() where T : Post;
-        IEnumerable<T> GetAll<T>(IEnumerable<int> ids) where T : Post;
+        Task<IEnumerable<T>> Get<T>(IEnumerable<int>? ids = null) where T : Post;
         Task<T> Create<T>(T post) where T : Post;
     }
 
@@ -57,9 +56,11 @@ namespace BuyOrBid.Services
             return await _myDbContext.Set<T>().ToArrayAsync();
         }
 
-        public IEnumerable<T> GetAll<T>(IEnumerable<int> ids) where T : Post
+        public async Task<IEnumerable<T>> Get<T>(IEnumerable<int>? ids = null) where T : Post
         {
-            return _myDbContext.Set<T>().AsNoTracking().AsEnumerable().Join(ids, x => x.PostId, x => x, (post, id) => post);
+            if (ids is null) return await _myDbContext.Set<T>().AsNoTracking().ToArrayAsync();
+            return await _myDbContext.Set<T>().AsNoTracking().Where(x => ids.Contains(x.PostId)).ToArrayAsync();
+            //return await Task.FromResult<IEnumerable<T>>(_myDbContext.Set<T>().AsNoTracking().AsEnumerable().Join(ids, x => x.PostId, x => x, (post, id) => post));
         }
     }
 }

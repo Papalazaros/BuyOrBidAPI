@@ -198,7 +198,7 @@ namespace BuyOrBid.Services
                 : $"https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/{vin}?format=json";
 
             HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
-            var vinDecodeResult = await httpResponseMessage.ConvertResponseToObject<VehicleApiResponse<VinDecodeResult>>();
+            VehicleApiResponse<VinDecodeResult>? vinDecodeResult = await httpResponseMessage.ConvertResponseToObject<VehicleApiResponse<VinDecodeResult>>();
             return vinDecodeResult?.Results ?? Enumerable.Empty<VinDecodeResult>();
         }
     }

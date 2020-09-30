@@ -12,7 +12,7 @@ namespace BuyOrBid.Services
     {
         Task<AutoPost> CreatePostFromVin(string vin, int? modelYear = null);
         Task<IEnumerable<AutoPost>> CreatePostsFromVin(string vin, int? modelYear = null);
-        Task<IEnumerable<AutoPost>> Filter(AutoFilterRequest autoFilterRequest);
+        IQueryable<AutoPost> Filter(AutoFilterRequest autoFilterRequest);
         Task<Model> GetModel(int modelId);
         Task<Make> GetMake(int makeId);
         Task<IEnumerable<Model>> GetModels();
@@ -65,7 +65,7 @@ namespace BuyOrBid.Services
             return otherPosts;
         }
 
-        public async Task<IEnumerable<AutoPost>> Filter(AutoFilterRequest autoFilterRequest)
+        public IQueryable<AutoPost> Filter(AutoFilterRequest autoFilterRequest)
         {
             IQueryable<AutoPost> filteredPosts = _myDbContext.AutoPosts.AsNoTracking().Where(x => x.IsPublic == true);
 
@@ -169,7 +169,7 @@ namespace BuyOrBid.Services
                 filteredPosts = filteredPosts.Where(x => x.CreatedDate.HasValue && x.CreatedDate <= autoFilterRequest.CreatedDateTo);
             }
 
-            return await filteredPosts.ToArrayAsync();
+            return filteredPosts;
         }
 
         public async Task<Model> GetModel(int modelId)
@@ -200,11 +200,7 @@ namespace BuyOrBid.Services
                 autoPost.Make?.MakeName,
                 autoPost.Model?.ModelName,
                 autoPost.Series?.ToUpper(),
-                autoPost.Trim?.ToUpper(),
-                //autoPost.DisplacementInLiters > 0 && autoPost.AutoType != AutoType.Motorcycle ? $"{autoPost.DisplacementInLiters}L" : null,
-                //autoPost.DisplacementInCc > 0 && autoPost.AutoType == AutoType.Motorcycle ? $"{autoPost.DisplacementInCc}CC" : null,
-                //autoPost.Cylinders > 0 ? $"{autoPost.Cylinders}CYL" : null,
-                //autoPost.Doors > 0 ? $"{autoPost.Doors}DR" : null
+                autoPost.Trim?.ToUpper()
             }.Where(x => !string.IsNullOrEmpty(x)));
         }
 

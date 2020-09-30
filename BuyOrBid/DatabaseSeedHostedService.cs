@@ -202,8 +202,8 @@ namespace BuyOrBid
                 "WDBAA33A8BB093914",
             };
 
-            var model = myDbContext.Models.Include(x => x.Make).FirstOrDefault();
-            var makeId = model.MakeId;
+            Model model = myDbContext.Models.Include(x => x.Make).FirstOrDefault();
+            int? makeId = model.MakeId;
 
             foreach (string vin in vins)
             {

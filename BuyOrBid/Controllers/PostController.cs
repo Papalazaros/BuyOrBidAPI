@@ -2,6 +2,8 @@
 using BuyOrBid.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,12 +33,6 @@ namespace BuyOrBid.Controllers
             post.CreatedByUserId = 1;
 
             return Ok(await _postService.Create(post));
-        }
-
-        public async Task<IActionResult> GetAll<T>() where T : Post
-        {
-            var posts = await _postService.GetAll<T>();
-            return Ok(posts.Where(x => x.IsPublic == true));
         }
 
         [HttpGet]

@@ -7,7 +7,7 @@ namespace BuyOrBid.Models.Database
     public class Post
     {
         [Key]
-        public int? PostId { get; set; }
+        public int PostId { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,4)")]

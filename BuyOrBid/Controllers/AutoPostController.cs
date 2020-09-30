@@ -49,9 +49,9 @@ namespace BuyOrBid.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Get()
         {
-            return await base.GetAll<AutoPost>();
+            return Ok(await _postService.Get<AutoPost>());
         }
 
         [HttpGet]

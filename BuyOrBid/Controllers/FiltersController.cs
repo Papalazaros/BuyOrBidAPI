@@ -2,6 +2,7 @@
 using BuyOrBid.Models.Database;
 using BuyOrBid.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,32 +14,35 @@ namespace BuyOrBid.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FilterController : ControllerBase
+    public class FiltersController : ControllerBase
     {
         private readonly IAutoPostService _autoService;
 
-        public FilterController(IAutoPostService autoService)
+        public FiltersController(IAutoPostService autoService)
         {
             _autoService = autoService;
         }
 
         [HttpGet]
-        [Route("FilteredPosts")]
-        public async Task<IEnumerable<AutoPost>> Filter([FromQuery] AutoFilterRequest autoFilterRequest)
+        [Route("GetFilteredPosts")]
+        public async Task<IActionResult> GetFilteredPosts([FromQuery]AutoFilterRequest autoFilterRequest, [Range(1, int.MaxValue)]int page = 1, [Range(1, 24)]int pageSize = 5)
         {
-            return await _autoService.Filter(autoFilterRequest);
+            IQueryable<AutoPost> filteredPosts = _autoService.Filter(autoFilterRequest);
+            AutoPost[] posts = await filteredPosts.Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync();
+            int totalPosts = filteredPosts.Count();
+
+            return Ok(new PaginatedResponse<AutoPost>(posts, page, totalPosts));
         }
 
         [HttpGet]
-        [Route("Filters")]
-        public async Task<IActionResult> Filter()
+        public async Task<IActionResult> GetFilterModels()
         {
             List<FilterDescriptor> filterDescriptors = new List<FilterDescriptor>();
 
             foreach (PropertyInfo property in typeof(AutoFilterRequest).GetProperties())
             {
-                var propertyType = property.PropertyType;
-                var propertySubType = property.PropertyType.GenericTypeArguments.FirstOrDefault();
+                Type propertyType = property.PropertyType;
+                Type propertySubType = property.PropertyType.GenericTypeArguments.FirstOrDefault();
 
                 FilterDescriptor filterDescriptor = new FilterDescriptor();
                 filterDescriptor.PropertyName = property.Name;
@@ -59,12 +63,12 @@ namespace BuyOrBid.Controllers
                 }
                 else if (property.Name == "Makes")
                 {
-                    var makes = await _autoService.GetMakes();
+                    IEnumerable<Make> makes = await _autoService.GetMakes();
                     filterDescriptor.AvailableValues = makes.OrderBy(x => x.MakeName).Select(x => new { Key = x.MakeId, Value = x.MakeName });
                 }
                 else if (property.Name == "Models")
                 {
-                    var models = await _autoService.GetModels();
+                    IEnumerable<Model> models = await _autoService.GetModels();
                     filterDescriptor.AvailableValues = models.OrderBy(x => x.ModelName).Select(x => new { Key = x.ModelId, Value = x.ModelName, DependsOn = new { PropertyName = "Makes", PropertyValue = x.MakeId } });
                 }
 
