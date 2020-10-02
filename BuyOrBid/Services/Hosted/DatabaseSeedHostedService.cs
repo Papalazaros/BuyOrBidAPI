@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BuyOrBid
+namespace BuyOrBid.Services.Hosted
 {
     public class DatabaseSeedHostedService : IHostedService
     {

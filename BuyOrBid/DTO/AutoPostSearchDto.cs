@@ -1,4 +1,4 @@
-﻿namespace BuyOrBid
+﻿namespace BuyOrBid.DTO
 {
     public class AutoPostSearchDto
     {

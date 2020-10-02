@@ -6,7 +6,7 @@ namespace BuyOrBid.Models.Database
     public class Make
     {
         [Key]
-        public int? MakeId { get; set; }
+        public int MakeId { get; set; }
 
         [Required]
         public string? MakeName { get; set; }

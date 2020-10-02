@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace BuyOrBid
+namespace BuyOrBid.Extensions
 {
     public static class HttpResponseMessageExtensions
     {

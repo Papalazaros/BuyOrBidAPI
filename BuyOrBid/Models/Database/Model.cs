@@ -6,7 +6,7 @@ namespace BuyOrBid.Models.Database
     public class Model
     {
         [Key]
-        public int? ModelId { get; set; }
+        public int ModelId { get; set; }
 
         [Required]
         public string? ModelName { get; set; }

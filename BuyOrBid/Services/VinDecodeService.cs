@@ -1,4 +1,5 @@
-﻿using BuyOrBid.Models;
+﻿using BuyOrBid.Extensions;
+using BuyOrBid.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;

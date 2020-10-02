@@ -7,13 +7,13 @@ namespace BuyOrBid.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AutoPostController : PostController
+    public class AutoPostsController : PostsController
     {
         private readonly IVinDecodeService _vinDecodeService;
         private readonly IAutoPostService _autoPostService;
         private readonly IPostService _postService;
 
-        public AutoPostController(IPostService postService,
+        public AutoPostsController(IPostService postService,
             IVinDecodeService vinDecodeService,
             IAutoPostService autoPostService) : base(postService)
         {
@@ -46,12 +46,6 @@ namespace BuyOrBid.Controllers
             post.SystemTitle = AutoPostService.GenerateTitle(post);
 
             return await base.Create(post);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            return Ok(await _postService.Get<AutoPost>());
         }
 
         [HttpGet]

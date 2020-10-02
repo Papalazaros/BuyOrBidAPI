@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BuyOrBid.DTO;
 using BuyOrBid.Models;
 using BuyOrBid.Models.Database;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,7 @@ namespace BuyOrBid.Services
 
         public async Task<T> Get<T>(int postId) where T : Post
         {
-            return (T)await _myDbContext.FindAsync(typeof(T), postId);
+            return await _myDbContext.Set<T>().AsNoTracking().Include(x => x.PostImages).FirstOrDefaultAsync(x => x.PostId == postId);
         }
 
         public async Task<IEnumerable<T>> GetAll<T>() where T : Post
@@ -59,8 +60,7 @@ namespace BuyOrBid.Services
         public async Task<IEnumerable<T>> Get<T>(IEnumerable<int>? ids = null) where T : Post
         {
             if (ids is null) return await _myDbContext.Set<T>().AsNoTracking().ToArrayAsync();
-            return await _myDbContext.Set<T>().AsNoTracking().Where(x => ids.Contains(x.PostId)).ToArrayAsync();
-            //return await Task.FromResult<IEnumerable<T>>(_myDbContext.Set<T>().AsNoTracking().AsEnumerable().Join(ids, x => x.PostId, x => x, (post, id) => post));
+            return await _myDbContext.Set<T>().AsNoTracking().Where(x => ids.Contains(x.PostId)).Include(x => x.PostImages).ToArrayAsync();
         }
     }
 }

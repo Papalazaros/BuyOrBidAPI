@@ -1,4 +1,5 @@
 using AutoMapper;
+using BuyOrBid.DTO;
 using BuyOrBid.Models;
 using BuyOrBid.Services;
 using FluentValidation.AspNetCore;
