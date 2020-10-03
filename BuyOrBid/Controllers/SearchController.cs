@@ -4,6 +4,7 @@ using BuyOrBid.Models;
 using BuyOrBid.Models.Database;
 using BuyOrBid.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Nest;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,41 +19,61 @@ namespace BuyOrBid.Controllers
     {
         private readonly IElasticClient _elasticClient;
         private readonly IPostService _postService;
+        private readonly IAutoPostService _autoService;
         private readonly IMapper _mapper;
 
         public SearchController(IElasticClient elasticClient,
             IPostService postService,
-            IMapper mapper)
+            IMapper mapper,
+            IAutoPostService autoService)
         {
             _elasticClient = elasticClient;
             _postService = postService;
             _mapper = mapper;
+            _autoService = autoService;
         }
 
         [HttpGet]
         [Route("Autos")]
-        public async Task<IActionResult> Search(string? query, [Range(1, int.MaxValue)]int page = 1, [Range(1, 24)]int pageSize = 5)
+        public async Task<IActionResult> Search(string? query, [FromQuery] AutoFilterRequest filter, [Range(1, int.MaxValue)] int page = 1, [Range(1, 24)] int pageSize = 5)
         {
-            ISearchResponse<AutoPostSearchDto> searchResponse = await _elasticClient.SearchAsync<AutoPostSearchDto>(
-                s => s.Query(q => q.QueryString(d => d.Query(query)))
-                    .From((page - 1) * pageSize)
-                    .Size(pageSize));
+            IEnumerable<int>? searchResultIds = null;
+            IEnumerable<int> postIds;
 
-            IEnumerable<int> postIds = searchResponse.Documents.Select(x => x.PostId);
+            if (!string.IsNullOrEmpty(query))
+            {
+                ISearchResponse<AutoPostSearchDTO> searchResponse = await _elasticClient.SearchAsync<AutoPostSearchDTO>(
+                    s => s.Query(q => q.QueryString(d => d.Query(query)))
+                        .From((page - 1) * pageSize)
+                        .Size(pageSize));
 
-            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(postIds), page, searchResponse.Total));
+                searchResultIds = searchResponse.Documents.Select(x => x.PostId);
+            }
+
+            IQueryable<int> filterIds = _autoService.Filter(filter).Select(x => x.PostId);
+
+            if (searchResultIds != null)
+            {
+                postIds = searchResultIds.Join(filterIds, x => x, x => x, (postId1, postId2) => postId1).ToArray();
+            }
+            else
+            {
+                postIds = filterIds;
+            }
+
+            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(postIds), page, postIds.Count()));
         }
 
-        //[HttpGet]
-        //[Route("Reindex")]
-        //public async Task<IActionResult> ReIndex()
-        //{
-        //    await _elasticClient.DeleteByQueryAsync<AutoPostSearchDto>(q => q.MatchAll());
-        //    IEnumerable<AutoPost> allPosts = await _postService.Get<AutoPost>();
-        //    IEnumerable<AutoPostSearchDto> postsToIndex = _mapper.Map<IEnumerable<AutoPost>, IEnumerable<AutoPostSearchDto>>(allPosts);
-        //    await _elasticClient.IndexManyAsync(postsToIndex);
+        [HttpGet]
+        [Route("Reindex")]
+        public async Task<IActionResult> ReIndex()
+        {
+            await _elasticClient.DeleteByQueryAsync<AutoPostSearchDTO>(q => q.MatchAll());
+            IEnumerable<AutoPost> allPosts = await _postService.Get<AutoPost>();
+            IEnumerable<AutoPostSearchDTO> postsToIndex = _mapper.Map<IEnumerable<AutoPost>, IEnumerable<AutoPostSearchDTO>>(allPosts);
+            await _elasticClient.IndexManyAsync(postsToIndex);
 
-        //    return Ok($"{postsToIndex.Count()} post(s) reindexed");
-        //}
+            return Ok($"{postsToIndex.Count()} post(s) reindexed");
+        }
     }
 }

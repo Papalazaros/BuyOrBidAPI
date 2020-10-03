@@ -1,7 +1,6 @@
 ﻿using BuyOrBid.Models;
 using BuyOrBid.Models.Database;
 using BuyOrBid.Models.Database.Enums;
-using BuyOrBid.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -42,6 +41,8 @@ namespace BuyOrBid.Services.Hosted
             IAutoPostService autoService = scope.ServiceProvider.GetRequiredService<IAutoPostService>();
             IPostService postService = scope.ServiceProvider.GetRequiredService<IPostService>();
             MyDbContext myDbContext = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
+            HashSet<string> existingVins = myDbContext.AutoPosts.Where(x => !string.IsNullOrEmpty(x.Vin)).Select(x => x.Vin!).AsNoTracking().ToHashSet();
 
             List<string> vins = new List<string>
             {
@@ -207,6 +208,8 @@ namespace BuyOrBid.Services.Hosted
 
             foreach (string vin in vins)
             {
+                if (existingVins.Contains(vin)) continue;
+
                 AutoPost autoPost = await autoService.CreatePostFromVin(vin);
 
                 DateTime now = DateTime.UtcNow;
@@ -233,6 +236,7 @@ namespace BuyOrBid.Services.Hosted
                 autoPost.UserTitle = autoPost.SystemTitle;
                 autoPost.Language = "English";
                 autoPost.IsPublic = true;
+                autoPost.Mileage = 10000;
 
                 await postService.Create(autoPost);
             }

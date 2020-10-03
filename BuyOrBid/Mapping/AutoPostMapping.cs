@@ -8,7 +8,7 @@ namespace BuyOrBid.Mapping
     {
         public AutoPostMapping()
         {
-            CreateMap<AutoPost, AutoPostSearchDto>();
+            CreateMap<AutoPost, AutoPostSearchDTO>();
         }
     }
 }

@@ -2,6 +2,7 @@ using AutoMapper;
 using BuyOrBid.DTO;
 using BuyOrBid.Models;
 using BuyOrBid.Services;
+using BuyOrBid.Services.Hosted;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -51,7 +52,7 @@ namespace BuyOrBid
 
             AddElasticsearch(services, Configuration);
 
-            //services.AddHostedService<DatabaseSeedHostedService>();
+            services.AddHostedService<DatabaseSeedHostedService>();
 
             services.AddAutoMapper(typeof(Startup));
 
@@ -129,7 +130,7 @@ namespace BuyOrBid
 
             ConnectionSettings settings = new ConnectionSettings(new Uri(url))
                 .DefaultIndex(defaultIndex)
-                .DefaultMappingFor<AutoPostSearchDto>(x => x);
+                .DefaultMappingFor<AutoPostSearchDTO>(x => x);
 
             ElasticClient client = new ElasticClient(settings);
 

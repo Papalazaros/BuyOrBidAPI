@@ -22,6 +22,13 @@ namespace BuyOrBid.Controllers
             _postService = postService;
         }
 
+        [HttpGet]
+        [Route("{postId:int}")]
+        public async Task<IActionResult> Get(int postId)
+        {
+            return await base.Get<AutoPost>(postId);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(AutoPost post)
         {

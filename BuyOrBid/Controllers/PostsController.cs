@@ -2,9 +2,6 @@
 using BuyOrBid.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BuyOrBid.Controllers
@@ -35,11 +32,9 @@ namespace BuyOrBid.Controllers
             return Ok(await _postService.Create(post));
         }
 
-        [HttpGet]
-        [Route("{postId:int}")]
-        public async Task<IActionResult> Get(int postId)
+        public async Task<IActionResult> Get<T>(int postId) where T : Post
         {
-            Post post = await _postService.Get<Post>(postId);
+            T post = await _postService.Get<T>(postId);
             if (post == null) return NotFound();
             return Ok(post);
         }

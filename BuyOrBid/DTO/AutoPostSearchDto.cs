@@ -1,6 +1,6 @@
 ﻿namespace BuyOrBid.DTO
 {
-    public class AutoPostSearchDto
+    public class AutoPostSearchDTO
     {
         public int PostId { get; set; }
 

@@ -3,7 +3,6 @@ using BuyOrBid.DTO;
 using BuyOrBid.Models;
 using BuyOrBid.Models.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Nest;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +39,7 @@ namespace BuyOrBid.Services
 
             if (post.IsPublic == true && post is AutoPost autoPost)
             {
-                AutoPostSearchDto postToIndex = _mapper.Map<T, AutoPostSearchDto>(post);
+                AutoPostSearchDTO postToIndex = _mapper.Map<T, AutoPostSearchDTO>(post);
                 await _elasticClient.IndexDocumentAsync(postToIndex);
             }
 
@@ -50,11 +49,6 @@ namespace BuyOrBid.Services
         public async Task<T> Get<T>(int postId) where T : Post
         {
             return await _myDbContext.Set<T>().AsNoTracking().Include(x => x.PostImages).FirstOrDefaultAsync(x => x.PostId == postId);
-        }
-
-        public async Task<IEnumerable<T>> GetAll<T>() where T : Post
-        {
-            return await _myDbContext.Set<T>().ToArrayAsync();
         }
 
         public async Task<IEnumerable<T>> Get<T>(IEnumerable<int>? ids = null) where T : Post

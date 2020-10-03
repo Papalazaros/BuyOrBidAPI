@@ -24,17 +24,6 @@ namespace BuyOrBid.Controllers
         }
 
         [HttpGet]
-        [Route("GetFilteredPosts")]
-        public async Task<IActionResult> GetFilteredPosts([FromQuery]AutoFilterRequest autoFilterRequest, [Range(1, int.MaxValue)]int page = 1, [Range(1, 24)]int pageSize = 5)
-        {
-            IQueryable<AutoPost> filteredPosts = _autoService.Filter(autoFilterRequest);
-            AutoPost[] posts = await filteredPosts.Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync();
-            int totalPosts = filteredPosts.Count();
-
-            return Ok(new PaginatedResponse<AutoPost>(posts, page, totalPosts));
-        }
-
-        [HttpGet]
         public async Task<IActionResult> GetFilterModels()
         {
             List<FilterDescriptor> filterDescriptors = new List<FilterDescriptor>();
