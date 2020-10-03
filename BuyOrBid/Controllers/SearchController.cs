@@ -38,7 +38,6 @@ namespace BuyOrBid.Controllers
         public async Task<IActionResult> Search(string? query, [FromQuery] AutoFilterRequest filter, [Range(1, int.MaxValue)] int page = 1, [Range(1, 24)] int pageSize = 5)
         {
             IEnumerable<int>? searchResultIds = null;
-            IEnumerable<int> postIds;
 
             if (!string.IsNullOrEmpty(query))
             {
@@ -50,18 +49,14 @@ namespace BuyOrBid.Controllers
                 searchResultIds = searchResponse.Documents.Select(x => x.PostId);
             }
 
-            IQueryable<int> filterIds = _autoService.Filter(filter).Select(x => x.PostId);
+            IEnumerable<int> filterIds = await _autoService.Filter(filter).Select(x => x.PostId).ToArrayAsync();
 
             if (searchResultIds != null)
             {
-                postIds = searchResultIds.Join(filterIds, x => x, x => x, (postId1, postId2) => postId1).ToArray();
-            }
-            else
-            {
-                postIds = filterIds;
+                filterIds = searchResultIds.Join(filterIds, x => x, x => x, (postId1, postId2) => postId1);
             }
 
-            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(postIds), page, postIds.Count()));
+            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(filterIds), page, filterIds.Count()));
         }
 
         [HttpGet]

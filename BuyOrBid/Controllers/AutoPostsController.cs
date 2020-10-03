@@ -45,11 +45,6 @@ namespace BuyOrBid.Controllers
                 make = await _autoPostService.GetMake(post.MakeId.Value);
             }
 
-            if (model == null || make == null)
-            {
-                return BadRequest(ModelState.Values);
-            }
-
             post.SystemTitle = AutoPostService.GenerateTitle(post);
 
             return await base.Create(post);

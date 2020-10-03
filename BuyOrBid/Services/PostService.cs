@@ -53,8 +53,9 @@ namespace BuyOrBid.Services
 
         public async Task<IEnumerable<T>> Get<T>(IEnumerable<int>? ids = null) where T : Post
         {
-            if (ids is null) return await _myDbContext.Set<T>().AsNoTracking().ToArrayAsync();
-            return await _myDbContext.Set<T>().AsNoTracking().Where(x => ids.Contains(x.PostId)).Include(x => x.PostImages).ToArrayAsync();
+            IQueryable<T> set = _myDbContext.Set<T>().AsNoTracking();
+            if (ids is null) return await set.ToArrayAsync();
+            return await set.Where(x => ids.Contains(x.PostId)).Include(x => x.PostImages).ToArrayAsync();
         }
     }
 }

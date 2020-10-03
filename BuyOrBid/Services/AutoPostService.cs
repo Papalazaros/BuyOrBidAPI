@@ -169,6 +169,11 @@ namespace BuyOrBid.Services
                 filteredPosts = filteredPosts.Where(x => x.CreatedDate.HasValue && x.CreatedDate <= autoFilterRequest.CreatedDateTo);
             }
 
+            if (autoFilterRequest.HasImages != null)
+            {
+                filteredPosts = filteredPosts.Where(x => x.PostImages.Any() == autoFilterRequest.HasImages);
+            }
+
             return filteredPosts;
         }
 
