@@ -30,12 +30,6 @@ namespace BuyOrBid
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddResponseCompression(options =>
-            {
-                options.Providers.Add<BrotliCompressionProvider>();
-                options.Providers.Add<GzipCompressionProvider>();
-            });
-
             services.AddMemoryCache();
 
             services.AddDbContext<MyDbContext>(options =>
@@ -55,6 +49,13 @@ namespace BuyOrBid
             services.AddHostedService<DatabaseSeedHostedService>();
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+                options.EnableForHttps = true;
+            });
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {

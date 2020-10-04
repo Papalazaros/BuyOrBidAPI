@@ -49,14 +49,18 @@ namespace BuyOrBid.Controllers
                 searchResultIds = searchResponse.Documents.Select(x => x.PostId);
             }
 
-            IEnumerable<int> filterIds = await _autoService.Filter(filter).Select(x => x.PostId).ToArrayAsync();
+            IEnumerable<int> filterIds = _autoService.Filter(filter).Select(x => x.PostId);
 
             if (searchResultIds != null)
             {
                 filterIds = searchResultIds.Join(filterIds, x => x, x => x, (postId1, postId2) => postId1);
             }
 
-            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(filterIds), page, filterIds.Count()));
+            int[] allResults = filterIds.ToArray();
+
+            filterIds = allResults.Skip((page - 1) * pageSize).Take(pageSize);
+
+            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(filterIds), page, allResults.Length));
         }
 
         [HttpGet]
