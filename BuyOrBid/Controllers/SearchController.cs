@@ -53,14 +53,14 @@ namespace BuyOrBid.Controllers
 
             if (searchResultIds != null)
             {
-                filterIds = searchResultIds.Join(filterIds, x => x, x => x, (postId1, postId2) => postId1);
+                filterIds = searchResultIds.Join(filterIds, x => x, x => x, (postId, _) => postId);
             }
 
-            int[] allResults = filterIds.ToArray();
+            int totalResults = filterIds.Count();
 
-            filterIds = allResults.Skip((page - 1) * pageSize).Take(pageSize);
+            filterIds = filterIds.Skip((page - 1) * pageSize).Take(pageSize);
 
-            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(filterIds), page, allResults.Length));
+            return Ok(new PaginatedResponse<AutoPost>(await _postService.Get<AutoPost>(filterIds), page, totalResults));
         }
 
         [HttpGet]

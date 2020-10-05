@@ -23,7 +23,7 @@ namespace BuyOrBid.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetFilterModels()
+        public async Task<IActionResult> GetFilterModels()
         {
             List<FilterDescriptor> filterDescriptors = new List<FilterDescriptor>();
 
@@ -32,16 +32,18 @@ namespace BuyOrBid.Controllers
                 Type propertyType = property.PropertyType;
                 Type propertySubType = property.PropertyType.GenericTypeArguments.FirstOrDefault();
 
-                FilterDescriptor filterDescriptor = new FilterDescriptor();
-                filterDescriptor.PropertyName = property.Name;
-                filterDescriptor.PropertyType = propertyType.Name;
-                filterDescriptor.PropertySubType = propertySubType?.Name;
+                FilterDescriptor filterDescriptor = new FilterDescriptor
+                {
+                    PropertyName = property.Name,
+                    PropertyType = propertyType.Name,
+                    PropertySubType = propertySubType?.Name
+                };
 
                 if (propertyType.IsEnum)
                 {
                     filterDescriptor.AvailableValues = Enum.GetValues(propertyType);
                 }
-                else if (propertySubType != null && propertySubType.IsEnum)
+                else if (propertySubType?.IsEnum == true)
                 {
                     filterDescriptor.AvailableValues = Enum.GetValues(propertySubType);
                 }
@@ -49,16 +51,16 @@ namespace BuyOrBid.Controllers
                 {
                     filterDescriptor.AvailableValues = new int[] { 0, 1, 2, 3, 4, 5, 6, 8, 10, 12 };
                 }
-                //else if (property.Name == "Makes")
-                //{
-                //    IEnumerable<Make> makes = await _autoService.GetMakes();
-                //    filterDescriptor.AvailableValues = makes.OrderBy(x => x.MakeName).Select(x => new { Key = x.MakeId, Value = x.MakeName });
-                //}
-                //else if (property.Name == "Models")
-                //{
-                //    IEnumerable<Model> models = await _autoService.GetModels();
-                //    filterDescriptor.AvailableValues = models.OrderBy(x => x.ModelName).Select(x => new { Key = x.ModelId, Value = x.ModelName, DependsOn = new { PropertyName = "Makes", PropertyValue = x.MakeId } });
-                //}
+                else if (property.Name == "Makes")
+                {
+                    IEnumerable<Make> makes = await _autoService.GetMakes();
+                    filterDescriptor.AvailableValues = makes.OrderBy(x => x.MakeName).Select(x => new { Key = x.MakeId, Value = x.MakeName });
+                }
+                else if (property.Name == "Models")
+                {
+                    IEnumerable<Model> models = await _autoService.GetModels();
+                    filterDescriptor.AvailableValues = models.OrderBy(x => x.ModelName).Select(x => new { Key = x.ModelId, Value = x.ModelName, DependsOn = new { PropertyName = "Makes", PropertyValue = x.MakeId } });
+                }
 
                 RangeAttribute? rangeAttribute = property.GetCustomAttribute<RangeAttribute>();
 
